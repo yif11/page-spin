@@ -1,12 +1,27 @@
 (() => {
+  if (window.__pageSpinInjected) {
+    return;
+  }
+
+  window.__pageSpinInjected = true;
+
   let angle = 0;
   let visible = false;
   let restoreTimeout = null;
 
   const button = document.createElement("button");
   button.id = "page-spin-button";
-  button.textContent = "🔄";
+  button.type = "button";
   button.style.display = "none";
+
+  const updateButtonLabel = (isRotated) => {
+    const label = isRotated ? "Restore page" : "Rotate page";
+    button.textContent = label;
+    button.title = label;
+    button.setAttribute("aria-label", label);
+  };
+
+  updateButtonLabel(false);
 
   button.addEventListener("click", () => {
     if (restoreTimeout) {
@@ -28,6 +43,7 @@
     }
 
     body.style.transform = `rotateZ(${angle}deg)`;
+    updateButtonLabel(isRotated);
 
     if (!isRotated) {
       // After animation completes, fully restore original layout
@@ -41,6 +57,7 @@
         body.style.transition = "";
         html.scrollTop = scrollTop;
         body.scrollTop = scrollTop;
+        updateButtonLabel(false);
         restoreTimeout = null;
       }, 500);
     }
